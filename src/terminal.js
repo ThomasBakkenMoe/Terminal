@@ -12,18 +12,39 @@ export class Terminal extends Component{
      */
 
     addText(code){
-        let textBar = document.querySelector(".text");
+        let textBar = document.querySelector(".text").innerHTML;
+        switch (code) {
+            case "Backspace":
+
+                textBar.innerHTML.strike();
+
+        }
         if(code != "Enter"){
-            textBar.innerHTML += code;
+            textBar += code;
         } else {
             let command = textBar.innerHTML;
             console.log(command);
         }
-
     }
+
+    handleKeyPress = (event) =>{
+
+        let textBar = document.querySelector(".text");
+
+        if (event.key === 'Enter'){
+            console.log("Enter pressed!");
+            textBar.innerHTML = "";
+        }else if (event.keyCode === 8){
+            console.log("Backspace pressed!");
+            textBar.innerHTML = textBar.innerHTML.substr(0, textBar.innerHTML.length-2);
+        } else {
+            textBar.innerHTML += event.key;
+        }
+    };
+
     render(){
 
-        window.onkeypress = a =>  this.addText(a.key);
+        window.onkeydown = a => this.handleKeyPress(a);
         return(
             <div className="container">
                 <Command></Command>
