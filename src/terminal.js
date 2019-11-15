@@ -36,7 +36,7 @@ export class Terminal extends Component{
             textBar.innerHTML = "";
         }else if (event.keyCode === 8){
             console.log("Backspace pressed!");
-            textBar.innerHTML = textBar.innerHTML.substr(0, textBar.innerHTML.length-2);
+            textBar.innerHTML = textBar.innerHTML.substr(0, textBar.innerHTML.length-1);
         } else {
             textBar.innerHTML += event.key;
         }
