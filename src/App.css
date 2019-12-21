@@ -26,7 +26,16 @@ body { background: black }
     font-size: 24px;
     color: white;
     float:left;
+}
 
+.message {
+    position: relative;
+    display: inline-block;
+    font-family: Monaco, Arial, Helvetica, sans-serif;
+    line-height: 24px;
+    font-size: 24px;
+    color: white;
+    float:left;
 }
 
 .text::after {
@@ -35,12 +44,13 @@ body { background: black }
     top: 0;
     right: -15px;
     /* Remove display: inline-block if not required to be on the same line as text etc */
-    display: inline-block;
+    display: inline-flex;
     background-color: #606060;
     vertical-align: top;
     width: 10px;
     /* Set height to the line height of .text */
     height: 24px;
+    float: left;
     /*
     Animation paramaters:
     blink = animation-name,

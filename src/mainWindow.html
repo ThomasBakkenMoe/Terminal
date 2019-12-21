@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Terminal</title>
+    <link rel="stylesheet" href="App.css">
+</head>
+<body>
+    <div class="container">
+        <div>
+            <div class="root">
+                ~custodianOS $
+            </div>
+            <div class="message">Welcome back Izabelle!</div>
+            <br style="clear: both"/>
+            <div class="text">
+            </div>
+        </div>
+    </div>
+    <script>
+        const electron = require('electron');
+        const {ipcRenderer} = electron;
+        //const ul = document.querySelector('ul');
+        const text = document.querySelector(".text");
+        text.innerHTML = ""; // Prevents garbage data from initialization
+
+        window.onkeydown = key => this.handleKeyPress(key);
+
+        handleKeyPress = (event) =>{
+            if (event.key === 'Enter'){
+                console.log("Enter pressed!");
+                handleCommand();
+            }else if (event.keyCode === 8){
+                console.log("Backspace pressed!");
+                text.innerHTML = text.innerHTML.substr(0, text.innerHTML.length-1);
+            }else if(event.keyCode < 48 && event.keyCode !== 32){
+                event.preventDefault();
+            }
+            else {
+                text.innerHTML += event.key;
+            }
+        };
+
+        // Catch test clear
+        ipcRenderer.on('text:clear', ()=>{
+            text.innerHTML = "";
+        });
+
+        function handleCommand() {
+            console.log("Handling command!")
+            var command = text.innerHTML.replace(/\s/g, " ");
+            console.log("What is being sent to be parsed: " + text.innerHTML);
+
+            text.innerHTML = "";
+        }
+
+        /*
+
+        // Catch add item
+        ipcRenderer.on('item:add', (e, item)=>{
+            ul.className = 'collection';
+            const li = document.createElement('li');
+            li.className = 'collection-item';
+            const itemText = document.createTextNode(item);
+            li.appendChild(itemText);
+            ul.appendChild(li);
+        });
+
+        // Catch clear items
+        ipcRenderer.on('item:clear', ()=>{
+            ul.innerHTML = '';
+            ul.className = '';
+        });
+
+        // Remove Item on double click
+        ul.addEventListener('dblclick', removeItem);
+
+        function removeItem(e) {
+            e.target.remove();
+            if(ul.children.length == 0){
+                ul.className = '';
+            }
+        }
+        */
+
+    </script>
+</body>
+</html>
