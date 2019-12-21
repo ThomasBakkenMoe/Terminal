@@ -11,18 +11,24 @@
             <div class="root">
                 ~custodianOS $
             </div>
-            <div class="message">Welcome back Izabelle!</div>
+            <div class="message"></div>
             <br style="clear: both"/>
-            <div class="text">
-            </div>
+            <div class="text"></div>
         </div>
     </div>
     <script>
         const electron = require('electron');
         const {ipcRenderer} = electron;
         //const ul = document.querySelector('ul');
+        const message = document.querySelector(".message");
         const text = document.querySelector(".text");
+        let typeMessageItterator = 0;
+        let messageToBeTyped = "";
+        let typeMessageSpeed = 20; // The speed of the messages from the system being typed
         text.innerHTML = ""; // Prevents garbage data from initialization
+
+        messageToBeTyped = "Welcome back User!";
+        typeMessage();
 
         window.onkeydown = key => this.handleKeyPress(key);
 
@@ -47,11 +53,30 @@
         });
 
         function handleCommand() {
-            console.log("Handling command!")
-            var command = text.innerHTML.replace(/\s/g, " ");
+            console.log("Handling command!");
+            var command = text.innerHTML.replace(/\s/g, " ").toLowerCase();
             console.log("What is being sent to be parsed: " + text.innerHTML);
 
+            if (command === "tell me a joke"){
+                message.innerHTML = "";
+                messageToBeTyped = "Don’t use “beef stew” as a computer password. It’s not stroganoff. wadawdawdawdawdawdaw";
+                typeMessage();
+            }
+
             text.innerHTML = "";
+        }
+
+        function typeMessage(){
+
+            if (typeMessageItterator < messageToBeTyped.length){
+                console.log("Typing" + messageToBeTyped.charAt(typeMessageItterator));
+                message.innerHTML += messageToBeTyped.charAt(typeMessageItterator++);
+
+                setTimeout(typeMessage, typeMessageSpeed);
+
+            }else{
+                typeMessageItterator = 0;
+            }
         }
 
         /*

@@ -31,6 +31,9 @@ body { background: black }
 .message {
     position: relative;
     display: inline-block;
+    word-wrap: break-word;      /* IE 5.5-7 */
+    white-space: -moz-pre-wrap; /* Firefox 1.0-2.0 */
+    white-space: pre-wrap;      /* Current browsers*/
     font-family: Monaco, Arial, Helvetica, sans-serif;
     line-height: 24px;
     font-size: 24px;
