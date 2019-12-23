@@ -13,6 +13,9 @@ app.on('ready', ()=>{
 
     //Create new window
     mainWindow = new BrowserWindow({
+        width: 1400,
+        height: 600,
+        title: 'Custodian',
         webPreferences: {
             nodeIntegration: true
         }

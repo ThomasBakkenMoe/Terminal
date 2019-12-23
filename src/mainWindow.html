@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <script type="text/javascript" src="dao.js"></script>
     <title>Terminal</title>
     <link rel="stylesheet" href="App.css">
 </head>
@@ -13,26 +14,37 @@
             </div>
             <div class="message"></div>
             <br style="clear: both"/>
+            <br style="clear: both"/>
             <div class="text"></div>
         </div>
     </div>
     <script>
+
         const electron = require('electron');
-        const {ipcRenderer} = electron;
+        const {ipcRenderer, app} = electron;
         //const ul = document.querySelector('ul');
         const message = document.querySelector(".message");
         const text = document.querySelector(".text");
-        let typeMessageItterator = 0;
-        let messageToBeTyped = "";
-        let typeMessageSpeed = 20; // The speed of the messages from the system being typed
+
+        let typing = false;
+        let continueMessage = false;
+        let typeMessageSpeed = 10; // The speed of the messages from the system being typed
+        let stage = 0;
+
+
+
+
         text.innerHTML = ""; // Prevents garbage data from initialization
 
-        messageToBeTyped = "Welcome back User!";
-        typeMessage();
+        typeMessage("Welcome to CustodianOS, please type your provided identification number.");
 
         window.onkeydown = key => this.handleKeyPress(key);
 
         handleKeyPress = (event) =>{
+            if(typing){
+                return;
+            }
+
             if (event.key === 'Enter'){
                 console.log("Enter pressed!");
                 handleCommand();
@@ -52,30 +64,81 @@
             text.innerHTML = "";
         });
 
-        function handleCommand() {
+        function fetchQuestion() {
+            query("SELECT * FROM Question where Stage = ?", [stage]).then(res =>{
+
+                typeMessage(res.Question);
+            });
+            return;
+        }
+
+        async function handleCommand() {
             console.log("Handling command!");
-            var command = text.innerHTML.replace(/\s/g, " ").toLowerCase();
-            console.log("What is being sent to be parsed: " + text.innerHTML);
+            let command = text.innerHTML.replace(/\s/g, " ").toLowerCase();
+            text.innerHTML = "";
+
+            if (continueMessage){
+                switch (command) {
+                    case "y":
+                        fetchQuestion();
+                        continueMessage = false;
+                        return;
+                    case "n":
+                        typeMessage("Your loss");
+                        setTimeout(function(){ typeMessage("If you change your mind: press Y") }, 3000);
+                        return;
+                    default:
+                        return;
+                }
+            }
 
             if (command === "tell me a joke"){
                 message.innerHTML = "";
-                messageToBeTyped = "Don’t use “beef stew” as a computer password. It’s not stroganoff. wadawdawdawdawdawdaw";
-                typeMessage();
-            }
+                typeMessage("Don’t use “beef stew” as a computer password. It’s not stroganoff.");
+                return;
+            }else{
+                switch (stage) {
+                    case 0:
+                        query("SELECT * FROM User where ID = ?", [command]).then(res =>{
 
-            text.innerHTML = "";
+                            if (res == undefined){
+                                typeMessage("Identification number not recognized, please try again.")
+                            }else{
+                                console.log("name: " + res.Name);
+                                stage = res.Stage;
+
+                                if (stage === 0){
+
+                                }else {
+                                    typeMessage("Welcome back " + res.Name + " would you like to continue on your quest? [Y/N]");
+                                    continueMessage = true;
+
+                                }
+                            }
+                        });
+                        break;
+                }
+            }
         }
 
-        function typeMessage(){
+        function typeMessage(str){
+            if (typing){
+                return;
+            }
+            typing = true;
+            message.innerHTML = "";
+            let typeMessageIterator = 0;
+            type();
+            function type() {
+                if (typeMessageIterator < str.length){
+                    console.log("Typing" + str.charAt(typeMessageIterator));
+                    message.innerHTML += str.charAt(typeMessageIterator++);
 
-            if (typeMessageItterator < messageToBeTyped.length){
-                console.log("Typing" + messageToBeTyped.charAt(typeMessageItterator));
-                message.innerHTML += messageToBeTyped.charAt(typeMessageItterator++);
-
-                setTimeout(typeMessage, typeMessageSpeed);
-
-            }else{
-                typeMessageItterator = 0;
+                    setTimeout(type, typeMessageSpeed);
+                }else{
+                    typeMessageIterator = 0;
+                    typing = false;
+                }
             }
         }
 

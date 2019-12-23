@@ -11,6 +11,7 @@ body { background: black }
 .root{
     position: relative;
     float: left;
+    display: inline-block;
     font-family: Monaco, Arial, Helvetica, sans-serif;
     line-height: 24px;
     font-size: 24px;
