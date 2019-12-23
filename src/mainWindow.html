@@ -21,13 +21,14 @@
     <script>
 
         const electron = require('electron');
-        const {ipcRenderer, app} = electron;
-        //const ul = document.querySelector('ul');
+        const {ipcRenderer} = electron;
         const message = document.querySelector(".message");
         const text = document.querySelector(".text");
 
         let typing = false;
         let continueMessage = false;
+        let introMessage = false;
+        let userID = 0;
         let typeMessageSpeed = 10; // The speed of the messages from the system being typed
         let stage = 0;
 
@@ -65,8 +66,9 @@
         });
 
         function fetchQuestion() {
+            console.log("Fetching question " + stage);
             query("SELECT * FROM Question where Stage = ?", [stage]).then(res =>{
-
+                console.log("inside question query response");
                 typeMessage(res.Question);
             });
             return;
@@ -92,7 +94,27 @@
                 }
             }
 
-            if (command === "tell me a joke"){
+            if (introMessage){
+                switch (command) {
+                    case "y":
+                        introMessage = false;
+                        stage++;
+                        query("UPDATE User SET Stage = ? WHERE ID = ?", [stage, userID]).then(res =>{
+                            //TODO: fetchQuestion is not executing properly when in intro
+                            fetchQuestion();
+
+                        });
+                        return;
+                    case "n":
+                        typeMessage("Your loss");
+                        setTimeout(function(){ typeMessage("If you change your mind: press Y") }, 3000);
+                        return;
+                    default:
+                        return;
+                }
+            }
+
+            if (command === "-joke"){
                 message.innerHTML = "";
                 typeMessage("Don’t use “beef stew” as a computer password. It’s not stroganoff.");
                 return;
@@ -106,13 +128,17 @@
                             }else{
                                 console.log("name: " + res.Name);
                                 stage = res.Stage;
+                                userID = res.ID;
+
 
                                 if (stage === 0){
+
+                                    typeMessage("Welcome " + res.Name + ", I am the Custodian of your Christmas gift. Your gift is protected by a secret password. To get the password, you must first answer all of my conundrums. If you at any time need help; type '-help'. Are you ready? [Y/N]");
+                                    introMessage = true;
 
                                 }else {
                                     typeMessage("Welcome back " + res.Name + " would you like to continue on your quest? [Y/N]");
                                     continueMessage = true;
-
                                 }
                             }
                         });
@@ -131,9 +157,7 @@
             type();
             function type() {
                 if (typeMessageIterator < str.length){
-                    console.log("Typing" + str.charAt(typeMessageIterator));
                     message.innerHTML += str.charAt(typeMessageIterator++);
-
                     setTimeout(type, typeMessageSpeed);
                 }else{
                     typeMessageIterator = 0;
@@ -141,36 +165,6 @@
                 }
             }
         }
-
-        /*
-
-        // Catch add item
-        ipcRenderer.on('item:add', (e, item)=>{
-            ul.className = 'collection';
-            const li = document.createElement('li');
-            li.className = 'collection-item';
-            const itemText = document.createTextNode(item);
-            li.appendChild(itemText);
-            ul.appendChild(li);
-        });
-
-        // Catch clear items
-        ipcRenderer.on('item:clear', ()=>{
-            ul.innerHTML = '';
-            ul.className = '';
-        });
-
-        // Remove Item on double click
-        ul.addEventListener('dblclick', removeItem);
-
-        function removeItem(e) {
-            e.target.remove();
-            if(ul.children.length == 0){
-                ul.className = '';
-            }
-        }
-        */
-
     </script>
 </body>
 </html>

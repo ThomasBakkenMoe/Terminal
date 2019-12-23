@@ -18,8 +18,10 @@ function query(query, values) {
 
                     connection.query(query, values, (err, res, fields,) =>{
                         if (err) {
+                            connection.close();
                             reject(err)
                         } else {
+                            connection.close();
                             console.log(res);
                             resolve(res[0]);
                         }
