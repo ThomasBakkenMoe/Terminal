@@ -1,7 +1,7 @@
 const mysql = require('mysql');
 
 const pool = mysql.createPool({
-    connectionLimit: 2,
+    connectionLimit: 100,
     host: "mysql-ait.stud.idi.ntnu.no",
     user: "thomabmo",
     password: "",
@@ -10,6 +10,7 @@ const pool = mysql.createPool({
 });
 
 function query(query, values) {
+    console.log("Query " + query)
     return  new Promise(async function(resolve, reject){
         pool.getConnection((error, connection) => {
             if (error || !connection) {
@@ -18,10 +19,10 @@ function query(query, values) {
 
                     connection.query(query, values, (err, res, fields,) =>{
                         if (err) {
-                            connection.close();
+                            console.error("Error: " + err);
                             reject(err)
                         } else {
-                            connection.close();
+                            connection.release();
                             console.log(res);
                             resolve(res[0]);
                         }

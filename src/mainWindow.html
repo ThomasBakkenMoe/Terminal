@@ -29,6 +29,9 @@
         let continueMessage = false;
         let introMessage = false;
         let userID = 0;
+        let question = "";
+        let answer = "";
+        let passcode = "";
         let typeMessageSpeed = 10; // The speed of the messages from the system being typed
         let stage = 0;
 
@@ -67,9 +70,11 @@
 
         function fetchQuestion() {
             console.log("Fetching question " + stage);
-            query("SELECT * FROM Question where Stage = ?", [stage]).then(res =>{
+            query("SELECT * FROM Question WHERE Stage = ?", [stage]).then(res =>{
                 console.log("inside question query response");
-                typeMessage(res.Question);
+                question = res.Question;
+                answer = res.Answer;
+                typeMessage("Question " + stage + " of 6\n" + res.Question);
             });
             return;
         }
@@ -98,12 +103,7 @@
                 switch (command) {
                     case "y":
                         introMessage = false;
-                        stage++;
-                        query("UPDATE User SET Stage = ? WHERE ID = ?", [stage, userID]).then(res =>{
-                            //TODO: fetchQuestion is not executing properly when in intro
-                            fetchQuestion();
-
-                        });
+                        fetchQuestion();
                         return;
                     case "n":
                         typeMessage("Your loss");
@@ -129,11 +129,13 @@
                                 console.log("name: " + res.Name);
                                 stage = res.Stage;
                                 userID = res.ID;
+                                passcode = res.Passcode;
 
 
                                 if (stage === 0){
-
-                                    typeMessage("Welcome " + res.Name + ", I am the Custodian of your Christmas gift. Your gift is protected by a secret password. To get the password, you must first answer all of my conundrums. If you at any time need help; type '-help'. Are you ready? [Y/N]");
+                                    stage++;
+                                    query("UPDATE User SET Stage = ? WHERE ID = ?", [stage, userID]);
+                                    typeMessage("Welcome " + res.Name + ", I am the Custodian of your Christmas gift. Your gift is protected by a secret passcode. To get the passcode, you must first answer all of my conundrums. Are you ready? [Y/N]");
                                     introMessage = true;
 
                                 }else {
@@ -142,6 +144,33 @@
                                 }
                             }
                         });
+                        break;
+
+                    case 6:
+                        if(command.includes(answer.toLowerCase())){
+                            if (userID == 619252){
+                                typeMessage("Congratulations!\nYou have completed all of my conundrums!\n" +
+                                    "The passcode to your present is: " + passcode + "\nPlease tell this passcode to your mother to receive your present!\nMerry Christmas!")
+                            }else {
+                                typeMessage("Congratulations!\nYou have completed all of my conundrums!\n" +
+                                    "The passcode to your present is: " + passcode);
+                            }
+                        }else{
+                            typeMessage("Wrong");
+                            setTimeout(typeMessage, 2000, question);
+                        }
+                        break;
+
+                    default:
+                        if(command.includes(answer.toLowerCase())){
+                            stage++;
+                            query("UPDATE User SET Stage = ? WHERE ID = ?", [stage, userID]);
+                            typeMessage("Correct!");
+                            setTimeout(fetchQuestion, 3000);
+                        }else{
+                            typeMessage("Wrong");
+                            setTimeout(typeMessage, 2000, question);
+                        }
                         break;
                 }
             }
